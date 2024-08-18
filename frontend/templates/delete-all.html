@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %} Delete All {% endblock %}
+
+{% block content %}
+
+<p> Are you sure you want to delete all users from the database? </p>
+
+<form action="/delete-all" method="post">
+    <input type="submit" value="Delete All"/>
+</form>
+
+{% endblock %}

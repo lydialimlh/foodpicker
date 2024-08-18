@@ -42,7 +42,10 @@ def home():
         flash(f"You are logged in as {user}!", "info")
     else:
         user = "Guest"
-        flash(f"You are not logged in. Click on Login button above to login.", "info")
+        flash(
+            f"You are not logged in. Click on Login button above to login.",
+            "info",
+        )
     return render_template("index.html", user=user)
 
 
@@ -70,15 +73,27 @@ def login():
     else:
         if "user" in session:
 
-            error_message = "Already logged in!"
-            print(error_message)
             flash(f"Already logged in!", "error")
 
-            return render_template("login.html", error_message=error_message)
-
-            # return redirect(url_for("home"))
+            # return redirect(url_for("user", usr=session["user"]))
+            return redirect(url_for("home"))
 
         return render_template("login.html")
+
+
+@app.route("/delete-all", methods=["GET", "POST"])
+def delete_all():
+    if request.method == "GET":  # when the user lands on the page
+        return render_template("delete-all.html")
+
+    if request.method == "POST":
+        users.query.delete()
+        db.session.commit()
+        session.pop("user", None)
+        session.pop("email", None)
+        flash(f"All users have been deleted!", "info")
+
+        return redirect(url_for("home"))
 
 
 @app.route("/user", methods=["GET", "POST"])
@@ -98,11 +113,11 @@ def user():
                 found_user.email = email
                 db.session.commit()
                 flash(
-                    f"User {found_user.name} already exists, updating email to {email}!",
+                    f'Updating email for user "{found_user.name}" to "{email}"!',
                     "info",
                 )
 
-        else:
+        if request.method == "GET":
             if "email" in session:
                 email = session["email"]
 

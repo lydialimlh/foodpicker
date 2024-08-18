@@ -5,35 +5,6 @@
         <title> {% block title %}{% endblock%} </title>\
         <h1>Food Picker App</h1>
 
-        <style>
-          .popup {
-              display: none;
-              position: fixed;
-              z-index: 1;
-              left: 0;
-              top: 0;
-              width: 100%;
-              height: 100%;
-              overflow: auto;
-              background-color: rgba(0,0,0,0.4);
-          }
-          .popup-content {
-              background-color: #fefefe;
-              margin: 15% auto;
-              padding: 20px;
-              border: 1px solid #888;
-              width: 80%;
-              max-width: 500px;
-          }
-          .close {
-              color: #aaa;
-              float: right;
-              font-size: 28px;
-              font-weight: bold;
-              cursor: pointer;
-          }
-      </style>
-
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -54,37 +25,23 @@
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="logout">Logout</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="delete-all">Delete All Users</a>
                 </li>
               </ul>
             </div>
           </nav>
 
           <div class="container-fluid">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                  {% for msg in messages %}
+                      <p>System Message: {{ msg }}</p>
+                  {% endfor %}
+              {% endif %}
+            {% endwith %}
+
             {% block content %}
-              <div id="errorPopup" class="popup">
-                <div class="popup-content">
-                    <span class="close">&times;</span>
-                    <p id="errorMessage"></p>
-                </div>
-              </div>
-  
-              <script>
-                function showError(message) {
-                    document.getElementById('errorMessage').innerText = message;
-                    document.getElementById('errorPopup').style.display = 'block';
-                }
-            
-                document.querySelector('.close').onclick = function() {
-                    document.getElementById('errorPopup').style.display = 'none';
-                }
-            
-                window.onclick = function(event) {
-                    if (event.target == document.getElementById('errorPopup')) {
-                        document.getElementById('errorPopup').style.display = 'none';
-                    }
-                }
-              </script>
-              
             {% endblock %}
           </div>
 

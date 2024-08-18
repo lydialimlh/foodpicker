@@ -5,26 +5,6 @@
 {% block content %}
     <h1> Login </h1>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if error_message %}
-                showError("{{ error_message }}");
-            {% endif %}
-        });
-    </script>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <script>
-                {% for msg in messages %}
-                    showError("{{ msg }}");
-                {% endfor %}
-            </script>
-        {% endif %}
-    {% endwith %}
-
-
-
     <form action="/login" method="post">
         <p>Name:</p>
         <p><input type="text" name="nm" /></p>

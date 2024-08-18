@@ -2,17 +2,13 @@
 {% extends 'base.html' %}
 
 {% block title %} Home Page {% endblock %}
+
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-        <h1> Greetings, {{user}}! </h1>
-        {% if messages %}
-            {% for msg in messages %}
-                <p>{{ msg }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+
+    <h1> Greetings, {{user}}! </h1>
 
     <p> Welcome to Lydia's Food Picker App </p>
     <p> This is a simple app that helps you decide what to eat. </p>
     <p> Click the button below to get started. </p>
+
 {% endblock %}
