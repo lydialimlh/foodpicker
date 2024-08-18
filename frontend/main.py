@@ -10,12 +10,28 @@ from flask import (
     url_for,
 )
 from datetime import timedelta
+from flask_sqlalchemy import SQLAlchemy
 import time
 
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.sqlite3"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = "abc123"
 app.permanent_session_lifetime = timedelta(minutes=1)
+
+
+db = SQLAlchemy(app)
+
+
+class users(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
 
 
 @app.route("/")
@@ -36,27 +52,69 @@ def login():
         session.permanent = True
         user = request.form["nm"]
         session["user"] = user  # super simple way to store user data as a dictionary
+
+        found_user = users.query.filter_by(name=user).first()
+
+        if found_user:
+            session["email"] = found_user.email
+
+        else:
+            usr = users(user, "")
+            db.session.add(usr)
+            db.session.commit()
+
         flash(f"Login successful, {user}!", "info")
 
         return redirect(url_for("user", usr=user))
 
     else:
         if "user" in session:
-            flash(f"Already logged in!", "info")
-            return redirect(url_for("user", usr=session["user"]))
+
+            error_message = "Already logged in!"
+            print(error_message)
+            flash(f"Already logged in!", "error")
+
+            return render_template("login.html", error_message=error_message)
+
+            # return redirect(url_for("home"))
 
         return render_template("login.html")
 
 
-@app.route("/user")
+@app.route("/user", methods=["GET", "POST"])
 def user():
+    email = None
 
     if "user" in session:
         user = session["user"]
-        return render_template("user.html", user=user)
+
+        if request.method == "POST":
+            email = request.form["email"]
+            session["email"] = email
+
+            found_user = users.query.filter_by(name=user).first()
+
+            if found_user:
+                found_user.email = email
+                db.session.commit()
+                flash(
+                    f"User {found_user.name} already exists, updating email to {email}!",
+                    "info",
+                )
+
+        else:
+            if "email" in session:
+                email = session["email"]
+
+        return render_template("user.html", user=user, email=email)
     else:
         flash(f"You are not logged in!", "info")
         return redirect(url_for("login"))
+
+
+@app.route("/view")
+def view():
+    return render_template("view.html", values=users.query.all())
 
 
 @app.route("/logout")
@@ -65,6 +123,8 @@ def logout():
     flash(f"You have been logged out!", "info")
 
     session.pop("user", None)
+    session.pop("email", None)
+
     return redirect(url_for("login"))
 
 
@@ -97,4 +157,7 @@ def create_user():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    with app.app_context():
+        db.create_all()
+        app.run(debug=True)
